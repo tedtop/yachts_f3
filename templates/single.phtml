@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title><?=$yacht->title ?></title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="<?=$yacht->meta_description ?>" />
+  <meta name="keywords" content="<?=$yacht->meta_keywords ?>">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <style>
+    * {box-sizing: border-box;}
+
+    body, p {
+      margin: 0;
+    }
+
+    h2 { text-align: center; }
+
+    a { color: black; text-decoration: none; }
+    a:hover { color: black; text-decoration: underline; }
+
+    header > img {
+      width: 100%;
+      height: 100%;
+    }
+    header > .title {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 5em;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 10px grey;
+    }
+
+    .about {
+      margin: 5vh auto;
+      text-align: justify;
+      width: 80%;
+    }
+    .about .specs.row { 
+      margin-bottom: 3vh;
+      text-align: center;
+    }
+    .about .specs.row .name {
+      font-size: 0.7em;
+      display: block;
+    }
+
+    .gallery > ul {
+      max-width: auto;
+      list-style: none;
+      flex-wrap: wrap;
+      display: flex;
+      padding: 0;
+      margin: 0;
+    }
+    .gallery > ul > li {
+      text-align: center;
+      flex: 1 0 33%;
+      max-width: 33%;
+      padding: 10px;
+    }
+    .gallery img {
+      width: 100%;
+    }
+
+    .specifications {
+      margin: 5vh auto;
+      width: 80%;
+    }
+    .specifications > ul {
+      -webkit-column-count: 3;
+      -moz-column-count: 3;
+      column-count: 3;
+    }
+
+    .amenities {
+      margin: 5vh auto;
+      width: 80%;
+    }
+    .amenities h5 {
+      text-align: center;
+    }
+    .amenities .col {
+      border-right: 1px solid black;
+    }
+    .amenities .col:last-child {
+      border-right: none;
+    }
+
+    .crew-profile,
+    .layout {
+      margin: 5vh auto;
+      text-align: center;
+    }
+    .crew-profile > img,
+    .layout > img {
+      text-align:  center;
+      width: 80%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="<?=str_replace('https://images.charterindex.com/', '/assets/img_headers/', $yacht->header_image) ?>">
+    <div class="title"><?=strtoupper($yacht->name) ?></div>
+  </header>
+  <div class="about">
+    <h2>ABOUT <?=strtoupper($yacht->name) ?></h2>
+    <div class="specs row">
+      <div class="col">
+        <span class="name">LENGTH</span>
+        <span class="value"><?=$yacht->key_details->length ?></span>
+      </div>
+      <div class="col">
+        <span class="name">BUILDER</span>
+        <span class="value"><?=html_entity_decode($yacht->key_details->builder) ?></span>
+      </div>
+      <div class="col">
+        <div class="row">
+          <div class="col">
+            <span class="name">SLEEPS</span>
+            <span class="value"><?=$yacht->key_details->sleeps ?></span>
+          </div>
+          <div class="col">
+            <span class="name">CABINS</span>
+            <span class="value"><?=$yacht->key_details->cabins ?></span>
+          </div>
+          <div class="col">
+            <span class="name">BUILT</span>
+            <span class="value"><?=$yacht->key_details->built ?></span>
+          </div>
+          <div class="col">
+            <span class="name">REFIT</span>
+            <span class="value"><?=$yacht->key_details->refit ?></span>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <span class="name">PRICE FROM-TO</span>
+        <span class="value"><?=$yacht->key_details->price ?></span>
+      </div>
+    </div>
+    <p><?=str_replace('<br>', '<br><br>', html_entity_decode($yacht->about_html)) ?></p>
+    <p class="text-center"><?=$yacht->operating_in ?></p>
+  </div>
+
+  <div class="gallery">
+    <ul>
+    <?php foreach ($yacht->image_urls as $image): ?>
+      <li>
+        <img src="<?=str_replace('https://images.charterindex.com/', '/assets/img_yachts/', $image->url) ?>">
+      </li>
+    <?php endforeach; ?>
+    </ul>
+  </div>
+
+  <div class="specifications">
+    <h2>SPECIFICATIONS</h2>
+    <ul>
+      <?php foreach ($yacht->specs as $spec): ?>
+        <li><strong><?=$spec->heading ?>:</strong> <?=$spec->detail ?></li>
+      <?php endforeach; ?>
+    </ul>
+  </div>
+
+  <div class="amenities">
+    <h2>AMENITIES</h2>
+    <div class="row">
+      <div class="col">
+        <h5 class="name">General</h5>
+        <ul>
+          <?php foreach ($yacht->amenities->general as $bullet): ?>
+            <li><?=$bullet ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+      <div class="col">
+        <h5 class="name">Electrical</h5>
+        <ul>
+          <?php foreach ($yacht->amenities->electrical as $bullet): ?>
+            <li><?=$bullet ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+      <div class="col">
+        <h5 class="name">Toys</h5>
+        <ul>
+          <?php foreach ($yacht->amenities->toys as $bullet): ?>
+            <li><?=$bullet ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+      <div class="col">
+        <h5 class="name">Tenders</h5>
+        <ul>
+          <?php foreach ($yacht->amenities->tenders as $bullet): ?>
+            <li><?=$bullet ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+      <div class="col">
+        <h5 class="name">Diving</h5>
+        <ul>
+          <?php foreach ($yacht->amenities->diving as $bullet): ?>
+            <li><?=$bullet ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="crew-profile">
+    <h2>CREW PROFILE</h2>
+    <?php if (!empty($yacht->crew_image)): ?>
+      <img src="<?=str_replace('https://images.charterindex.com/', '/assets/img_crews/', $yacht->crew_image) ?>">
+    <?php endif; ?>
+  </div>
+
+  <?php if (!empty($yacht->layout->image)): ?>
+    <div class="layout">
+      <h2>LAYOUT</h2>
+      <img src="<?=str_replace('https://images.charterindex.com/', '/assets/img_layouts/', $yacht->layout->image) ?>">
+    </div>
+  <?php endif; ?>
+  
+  <pre><?php //print_r($yacht); ?></pre>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+</body>
+</html>
