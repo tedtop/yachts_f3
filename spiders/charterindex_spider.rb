@@ -1,11 +1,138 @@
 require 'kimurai'
 require 'uri'
 require 'set'
+require 'mysql2'
+require 'json'
+
+
+def length_converter(length_str)
+  ft_str = length_str.split(" / ", -1)[1]
+  return ft_str.split("ft", -1)[0]
+end
+
+class DBClient
+  
+  def initialize(host: "charterboats.com", username: "charscom_yachts", password: "charscom_yachts")
+    @client = Mysql2::Client.new(:host => host, :username => username, :password => password)
+  end
+
+  def query(query)
+    a = @client.query(query)
+    return a
+  end
+
+  def insert_listing(listing, original_data)
+
+    specs = listing[:specs].reduce({}) {|map, el| map.merge!({ el[:heading] => el[:detail] })}
+    
+    price = listing[:key_details][:price] != nil ? listing[:key_details][:price] : "" 
+    price = price.tr('^0-9', '')
+
+    puts listing[:amenities]
+
+
+    params = {
+      "source" => "charterindex",
+      "name" => listing[:name],
+      "title" => listing[:title],
+      "type" => "motor", # CHANGE THIS
+      "length" => length_converter(listing[:key_details][:length]),
+      "guests" => listing[:key_details][:sleeps],
+      "cabins" => listing[:key_details][:cabins],
+      "crew" => listing[:crew_profiles] != nil ? listing[:crew_profiles].length : 0,
+      "price" => price,
+      "charterindex_url" => listing[:url],
+      "meta_description" => listing[:meta_description],
+      "meta_keywords" => nil,
+      "header_image" => listing[:header_image],
+      "about_html" => listing[:about_html],
+      "about_text" => listing[:about_text],
+      "spec_yacht_name" => specs["Yacht name"],
+      "spec_prior_name" => specs["Prior name"],
+      "spec_length" => specs["Length"],
+      "spec_beam" => specs["Beam"],
+      "spec_draft" => specs["Draft"],
+      "spec_cruising_speed" => specs["Speed (cruising)"],
+      "spec_max_speed" => specs["Speed (max)"],
+      "spec_engine" => specs["Engine"],
+      "spec_hull" => specs["Hull"],
+      "spec_stabilizers" => specs["Stabilizers"],
+      "spec_flag" => specs["Flag"],
+      "spec_launched" => specs["Launched"],
+      "spec_refitted" => specs["Refitted"],
+      "spec_builder" => specs["Builder"],
+      "spec_designer" => specs["Designer"],
+      "video_url" => listing[:video_url],
+      "image_urls" => listing[:image_urls].to_json,
+      "features_amenities" => listing[:amenities][:general].to_json,
+      "features_electronics" => listing[:amenities][:electrical].to_json,
+      "features_toys" => listing[:amenities][:toys].to_json,
+      "features_diving" => listing[:amenities][:diving].to_json,
+      "features_tenders" => listing[:amenities][:tenders].to_json,
+      "crew_image" => "",
+      "crew_profiles" => listing[:crew_profiles].to_json,
+      "layout_html" => listing[:layout_html],
+      "layout_text" => listing[:layout_text],
+      "layout_image" => listing[:layout_image],
+      "original_data" => original_data,
+    }
+
+    column_names_str = params.keys.join(", ")
+    question_marks_str = params.keys.map{|p| "?"}.join(", ")
+
+    statement_str = p %{
+      INSERT INTO charscom_yachts.charterindex_listing (#{column_names_str}) VALUES (#{question_marks_str});
+      }.gsub(/\s+/, " ").strip
+
+    statement = @client.prepare(statement_str)
+
+    statement.execute(*params.values)
+
+    last_id = @client.query("SELECT LAST_INSERT_ID();").first.values[0]
+  
+
+    add_locations_to_id(last_id, listing[:locations])
+
+
+  end
+
+
+  def get_id_of_location(location)
+    location.sub! "&amp;", "&"
+
+    a = @client.query("select * from charscom_yachts.location where nice_name = '#{location}'").first&.values
+
+    if a != nil
+      return a[0]
+    end
+
+    return a
+  end
+
+
+  def add_locations_to_id(id, locations)
+
+    statement_str = p %{
+      INSERT INTO charscom_yachts.listing_location (listing_id, location_id) values (?, ?);
+    }.gsub(/\s+/, " ").strip
+
+    statement = @client.prepare(statement_str)
+
+    locations.each{|place|
+      id_loc = get_id_of_location(place)
+      if id_loc != nil and id_loc != 0
+        statement.execute(id, id_loc)
+      end
+    }
+  end
+  
+end
+
 
 class CharterIndexSpider < Kimurai::Base
   @name = "charterindex_spider"
   @engine = :selenium_chrome
-  @start_urls = ["https://www.charterindex.com/search/yachts"]
+  @start_urls = ["https://www.charterindex.com/search/yachts?categories=motor"] # OR categories=sailing CHANGE THIS
   @config = {
     user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36',
     retry_request_errors: [{ error: TimeoutError }],
@@ -77,7 +204,7 @@ class CharterIndexSpider < Kimurai::Base
       cabins: response.xpath('//*[@id="layout"]/main/div[1]/div[2]/div/div[2]/div[2]/span[1]/span').inner_html,
       built: response.xpath('//*[@id="layout"]/main/div[2]/section[2]/div[2]/ul/li[10]/p').text.squish,
       #refit: 
-      price: response.xpath('//*[@id="layout"]/main/div[1]/div[2]/div/div[3]/span[1]').inner_html + "/week"
+      price: response.xpath('//*[@id="layout"]/main/div[1]/div[2]/div/div[3]/span[1]').inner_html
     }
 
     item[:operating_in] = "Operating in " + response.xpath('//*[@id="layout"]/main/div[2]/section[2]/div[1]/section[2]/div/a')
@@ -85,6 +212,11 @@ class CharterIndexSpider < Kimurai::Base
         response.xpath("//*[@id=\"layout\"]/main/div[2]/section[2]/div[1]/section[2]/div/a[#{index + 1}]/div/span[1]")[0].inner_html
     }
     .join(", ")
+
+    item[:locations] = response.xpath('//*[@id="layout"]/main/div[2]/section[2]/div[1]/section[2]/div/a')
+    .map.with_index {|data, index| 
+        response.xpath("//*[@id=\"layout\"]/main/div[2]/section[2]/div[1]/section[2]/div/a[#{index + 1}]/div/span[1]")[0].inner_html
+    }
 
     item[:about_html] = response.xpath("//*[@id=\"layout\"]/main/div[2]/section[2]/div[1]/section[1]/div/div/div")&.inner_html&.squish.to_s
     item[:about_text] = response.xpath("//*[@id=\"layout\"]/main/div[2]/section[2]/div[1]/section[1]/div/div/div")&.text&.squish.to_s
@@ -143,7 +275,9 @@ class CharterIndexSpider < Kimurai::Base
     # I do not know what layout is supposed to be
     #item[:layout] = 
 
-    save_to "result.json", item, format: :pretty_json
+    # save_to "result.json", item, format: :pretty_json 
+    client = DBClient.new()
+    client.insert_listing(item, response.to_html)
   end
 
   if listing_url = ARGV[0]
@@ -154,4 +288,4 @@ class CharterIndexSpider < Kimurai::Base
 
 end
 
-CharterIndexSpider.crawl!
+# CharterIndexSpider.crawl!
