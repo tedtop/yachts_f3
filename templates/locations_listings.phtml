@@ -1,0 +1,4 @@
+<h1>{{ @count }} results</h1>
+<repeat group="{{ @listings }}" value="{{ @listing }}">
+    <a href="/listings/{{ @listing.name }}">{{ @listing.name  }}</a><br>
+</repeat>
