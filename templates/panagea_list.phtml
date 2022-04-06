@@ -290,7 +290,7 @@
         <!-- /custom-search-input-2 -->
         <div class="isotope-wrapper">
           <?php foreach (array_slice($listings, 0, 10) as $listing) : ?>
-            <div class="box_list isotope-item popular">
+            <div class="box_list isotope-item latest popular">
               <div class="row no-gutters">
                 <div class="col-lg-5">
                   <figure>
@@ -325,114 +325,6 @@
               </div>
             </div>
           <?php endforeach; ?>
-          <!-- /box_list -->
-          <div class="box_list isotope-item latest">
-            <div class="row no-gutters">
-              <div class="col-lg-5">
-                <figure>
-                  <small>Churches</small>
-                  <a href="tour-detail.html"><img src="img/tour_2.jpg" class="img-fluid" alt="" width="800" height="533">
-                    <div class="read_more"><span>Read more</span></div>
-                  </a>
-                </figure>
-              </div>
-              <div class="col-lg-7">
-                <div class="wrapper">
-                  <a href="#0" class="wish_bt"></a>
-                  <h3><a href="tour-detail.html">Notredam</a></h3>
-                  <p>Dicam diceret ut ius, no epicuri dissentiet philosophia vix. Id usu zril tacimates neglegentur. Eam id legimus torquatos cotidieque, usu decore percipitur definitiones ex, nihil utinam recusabo mel no.</p>
-                  <span class="price">From <strong>$124</strong> /per person</span>
-                </div>
-                <ul>
-                  <li><i class="icon_clock_alt"></i> 1h 30min</li>
-                  <li>
-                    <div class="score"><span>Good<em>350 Reviews</em></span><strong>7.0</strong></div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <!-- /box_list -->
-          <div class="box_list isotope-item popular">
-            <div class="row no-gutters">
-              <div class="col-lg-5">
-                <figure>
-                  <small>Museum</small>
-                  <a href="tour-detail.html"><img src="img/tour_3.jpg" class="img-fluid" alt="" width="800" height="533">
-                    <div class="read_more"><span>Read more</span></div>
-                  </a>
-                </figure>
-              </div>
-              <div class="col-lg-7">
-                <div class="wrapper">
-                  <a href="#0" class="wish_bt"></a>
-                  <h3><a href="tour-detail.html">Pompidue Museum</a></h3>
-                  <p>Dicam diceret ut ius, no epicuri dissentiet philosophia vix. Id usu zril tacimates neglegentur. Eam id legimus torquatos cotidieque, usu decore percipitur definitiones ex, nihil utinam recusabo mel no.</p>
-                  <span class="price">From <strong>$45</strong> /per person</span>
-                </div>
-                <ul>
-                  <li><i class="icon_clock_alt"></i> 1h 30min</li>
-                  <li>
-                    <div class="score"><span>Good<em>350 Reviews</em></span><strong>7.0</strong></div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <!-- /box_list -->
-          <div class="box_list isotope-item popular">
-            <div class="row no-gutters">
-              <div class="col-lg-5">
-                <figure>
-                  <small>Historic</small>
-                  <a href="tour-detail.html"><img src="img/tour_4.jpg" class="img-fluid" alt="" width="800" height="533">
-                    <div class="read_more"><span>Read more</span></div>
-                  </a>
-                </figure>
-              </div>
-              <div class="col-lg-7">
-                <div class="wrapper">
-                  <a href="#0" class="wish_bt"></a>
-                  <h3><a href="tour-detail.html">Versailles</a></h3>
-                  <p>Dicam diceret ut ius, no epicuri dissentiet philosophia vix. Id usu zril tacimates neglegentur. Eam id legimus torquatos cotidieque, usu decore percipitur definitiones ex, nihil utinam recusabo mel no.</p>
-                  <span class="price">From <strong>$25</strong> /per person</span>
-                </div>
-                <ul>
-                  <li><i class="icon_clock_alt"></i> 1h 30min</li>
-                  <li>
-                    <div class="score"><span>Superb<em>350 Reviews</em></span><strong>9.0</strong></div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <!-- /box_list -->
-          <div class="box_list isotope-item latest">
-            <div class="row no-gutters">
-              <div class="col-lg-5">
-                <figure>
-                  <small>Walking</small>
-                  <a href="tour-detail.html"><img src="img/tour_5.jpg" class="img-fluid" alt="" width="800" height="533">
-                    <div class="read_more"><span>Read more</span></div>
-                  </a>
-                </figure>
-              </div>
-              <div class="col-lg-7">
-                <div class="wrapper">
-                  <a href="#0" class="wish_bt"></a>
-                  <h3><a href="tour-detail.html">Tour Eiffel</a></h3>
-                  <p>Dicam diceret ut ius, no epicuri dissentiet philosophia vix. Id usu zril tacimates neglegentur. Eam id legimus torquatos cotidieque, usu decore percipitur definitiones ex, nihil utinam recusabo mel no.</p>
-                  <span class="price">From <strong>$65</strong> /per person</span>
-                </div>
-                <ul>
-                  <li><i class="icon_clock_alt"></i> 1h 30min</li>
-                  <li>
-                    <div class="score"><span>Superb<em>350 Reviews</em></span><strong>9.0</strong></div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
           <!-- /box_list -->
         </div>
         <!-- /isotope-wrapper -->
@@ -621,7 +513,7 @@
   <script src="/assets/js/infobox.js"></script>
 
   <!-- Masonry Filtering -->
-  <script src="js/isotope.min.js"></script>
+  <script src="/assets/js/isotope.min.js"></script>
   <script>
     $(window).on('load', function() {
       var $container = $('.isotope-wrapper');

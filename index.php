@@ -28,11 +28,12 @@ $f3->route(
 
 $f3->route(
     'GET /listings/@id',
-    function ($f3) {
-        $json = file_get_contents('assets/data/apollo_listings.json');
-        $listings = json_decode($json, false);
+    function ($f3) use ($db) {
+        $listing = new DB\SQL\Mapper($db, 'charterindex_listing');
+        $listing->load(['id=?', $f3->get('PARAMS.id')]);
+        $f3->set('listing', $listing);
 
-        $f3->set('listing', $listings[$f3->get('PARAMS.id') - 1]);
+        // echo View::instance()->render('templates/debug.phtml');
         echo View::instance()->render('templates/panagea_detail.phtml');
     }
 );
@@ -86,7 +87,6 @@ $f3->route(
 );
 
 /* === APOLLO === */
-
 $f3->route(
     'GET /location/@location',
     function ($f3) {
