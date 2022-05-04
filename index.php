@@ -1,28 +1,36 @@
 <?php
 require 'vendor/autoload.php';
 $f3 = \Base::instance();
-$db = new DB\SQL(
-    'mysql:host=localhost;port=3306;dbname=yachts_ci',
-    'root',
-    'root'
-);
-// $db = new DB\SQL(
-//     'mysql:host=localhost;port=3306;dbname=charscom_yachts',
-//     'charscom_yachts',
-//     'charscom_yachts'
-// );
+
+if ($_SERVER['SERVER_NAME'] == 'charterboats.com') {
+    $db = new DB\SQL(
+        'mysql:host=localhost;port=3306;dbname=charscom_yachts',
+        'charscom_yachts',
+        'charscom_yachts'
+    );
+} else {
+    $db = new DB\SQL(
+        'mysql:host=localhost;port=3306;dbname=yachts_ci',
+        'root',
+        'root'
+    );
+}
+
+$f3->redirect('GET /', '/listings');
 
 $f3->route(
     'GET /listings',
     function ($f3) use ($db) {
-        $json = file_get_contents('assets/data/apollo_listings.json');
-        $listings = json_decode($json, false);
-
-        $locations = $db->exec('SELECT * FROM location ORDER BY nice_name');
+        $result = $db->exec('SELECT nice_name FROM location ORDER BY nice_name');
+        $locations = array_map(function ($el) {
+            return $el['nice_name'];
+        }, $result);
         $f3->set('locations', $locations);
 
+        $listings = $db->exec('SELECT * FROM charterindex_listing ORDER BY RAND() LIMIT 10');
         $f3->set('listings', $listings);
-        echo View::instance()->render('templates/panagea_list.phtml');
+
+        echo Template::instance()->render('templates/panagea_list.phtml');
     }
 );
 
@@ -31,10 +39,21 @@ $f3->route(
     function ($f3) use ($db) {
         $listing = new DB\SQL\Mapper($db, 'charterindex_listing');
         $listing->load(['id=?', $f3->get('PARAMS.id')]);
+        $f3->set('ESCAPE', FALSE);
         $f3->set('listing', $listing);
 
-        // echo View::instance()->render('templates/debug.phtml');
         echo View::instance()->render('templates/panagea_detail.phtml');
+    }
+);
+
+$f3->route(
+    'GET /debug/@id',
+    function ($f3) use ($db) {
+        $listing = new DB\SQL\Mapper($db, 'charterindex_listing');
+        $listing->load(['id=?', $f3->get('PARAMS.id')]);
+        $f3->set('result', $listing);
+
+        echo View::instance()->render('templates/debug.phtml');
     }
 );
 
@@ -43,12 +62,6 @@ $f3->route(
     function ($f3) use ($db) {
         $f3->set('locations', $db->exec('SELECT * FROM location ORDER BY nice_name'));
         echo Template::instance()->render('templates/locations.phtml');
-
-        // $json = file_get_contents('assets/data/apollo_listings.json');
-        // $yachts = json_decode($json, false);
-
-        // $f3->set('locations', $locations);
-        // echo View::instance()->render('templates/paginated.phtml');
     }
 );
 
@@ -66,12 +79,6 @@ $f3->route(
         $f3->set('count', count($listings));
         $f3->set('listings', $db->exec($sql));
         echo Template::instance()->render('templates/locations_listings.phtml');
-
-        // $json = file_get_contents('assets/data/apollo_listings.json');
-        // $yachts = json_decode($json, false);
-
-        // $f3->set('yachts', $yachts);
-        // echo View::instance()->render('templates/paginated.phtml');
     }
 );
 
@@ -107,7 +114,7 @@ $f3->route(
 
 $f3->route(
     'GET /apollo/listings',
-    function ($f3) {
+    function ($f3) use ($db) {
         $json = file_get_contents('assets/data/apollo_listings.json');
         $yachts = json_decode($json, false);
 
